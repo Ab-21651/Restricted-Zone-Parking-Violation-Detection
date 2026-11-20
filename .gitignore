@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Model weights & exports (downloaded / generated)
+models/*
+!models/.gitkeep
+
+# Data & outputs (large, not versioned)
+data/videos/*
+!data/videos/.gitkeep
+outputs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
