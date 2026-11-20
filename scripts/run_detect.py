@@ -29,6 +29,7 @@ def main() -> None:
     ap.add_argument("--show", action="store_true", help="Display annotated frames")
     ap.add_argument("--save", default=None, help="Write annotated output (video or image path)")
     ap.add_argument("--max-frames", type=int, default=0, help="Stop after N frames (0 = all)")
+    ap.add_argument("--snapshot", default=None, help="Save the last annotated frame as an image")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -56,7 +57,7 @@ def main() -> None:
         fps = fps_meter.tick()
         n += 1
 
-        if args.show or args.save:
+        if args.show or args.save or args.snapshot:
             draw_detections(frame, detections)
             draw_hud(frame, [f"infer {latency_ms:.1f} ms", f"loop {fps:.1f} FPS", f"vehicles {len(detections)}"])
 
@@ -81,6 +82,9 @@ def main() -> None:
 
     if writer is not None:
         writer.release()
+    if args.snapshot and n:
+        Path(args.snapshot).parent.mkdir(parents=True, exist_ok=True)
+        cv2.imwrite(args.snapshot, frame)
     cv2.destroyAllWindows()
 
     if latencies:

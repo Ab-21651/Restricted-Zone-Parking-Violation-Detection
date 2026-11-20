@@ -24,6 +24,36 @@ python scripts/run_detect.py --source data/videos/sample.mp4 --save outputs/dete
 ```
 
 The script prints mean / median / p95 inference latency and FPS.
+Add `--max-frames 300 --snapshot outputs/snap.jpg` for a quick run that saves one annotated frame.
+
+Dataset: ISLab PVD videos go in `data/videos/islab/` (`ISLab-01.mp4` … `ISLab-16.mp4`).
+`python scripts/preview_videos.py` builds `outputs/contact_sheet.jpg` with one frame per video.
+
+## Step 2 — restricted zone + tracking + dwell time
+
+1. Draw the restricted zone(s) for a video (saved to `configs/zones/<video>.yaml`):
+
+   ```powershell
+   python scripts/draw_zone.py --video data/videos/islab/ISLab-07.mp4
+   python scripts/draw_zone.py --video data/videos/islab/ISLab-08.mp4 --copy-from ISLab-07   # same scene
+   ```
+
+   Left click adds a point, right click undoes, `n` starts another polygon, `a`/`d` seek ±5 s, `s` saves.
+
+2. Run the pipeline:
+
+   ```powershell
+   python scripts/run_pipeline.py --source data/videos/islab/ISLab-07.mp4 --show
+   python scripts/run_pipeline.py --source data/videos/islab/ISLab-07.mp4 --save outputs/pipeline_07.mp4
+   ```
+
+How it works: YOLO + ByteTrack give every vehicle a persistent id. A vehicle whose
+ground point (bottom-centre of its box) is inside a zone and which has moved less
+than 15 % of its box height over 2 s counts as *stopped*; after `dwell.threshold_s`
+(30 s) of stopped time one `violation` event is raised, and a `cleared` event when
+it leaves or disappears for more than 5 s. Timing uses video timestamps. Duplicate
+boxes and tracker id switches are merged so one vehicle gives one alert.
+Events go to `outputs/events/<video>.jsonl`; all parameters are in `configs/default.yaml`.
 
 ## Project layout
 

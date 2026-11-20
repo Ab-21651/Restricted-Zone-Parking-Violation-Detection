@@ -5,7 +5,7 @@ model:
   # Later steps will point this at exported formats (ONNX / NCNN / TFLite).
   path: yolov8n.pt
   imgsz: 640
-  conf: 0.35          # minimum confidence to keep a detection
+  conf: 0.35          # minimum confidence to keep a detection (detect-only mode)
   iou: 0.5            # NMS IoU threshold
 
 # COCO class ids treated as vehicles
@@ -15,6 +15,20 @@ vehicle_classes:
   5: bus
   7: truck
 
+tracking:
+  tracker: configs/bytetrack.yaml
+  conf: 0.1           # low on purpose: ByteTrack uses low-score boxes to keep tracks alive
+
+pipeline:
+  process_fps: 10     # frames analysed per second of video (rest are skipped)
+
+dwell:
+  threshold_s: 30     # stationary time inside a zone before a violation is raised
+  still_window_s: 2.0 # look-back window used to decide if a vehicle is stationary
+  still_ratio: 0.15   # max movement in that window, as a fraction of box height
+  grace_s: 5.0        # how long a vehicle may disappear (occlusion) before its state is dropped
+  reassoc_iou: 0.5    # a new track overlapping a lost one this much inherits its state
+
 source:
   # Video file path, webcam index (0), or RTSP URL (used in the simulation step)
-  uri: data/videos/sample.mp4
+  uri: data/videos/islab/ISLab-07.mp4

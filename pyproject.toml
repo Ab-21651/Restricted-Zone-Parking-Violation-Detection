@@ -12,6 +12,7 @@ dependencies = [
     "opencv-python>=4.8",
     "numpy>=1.24",
     "pyyaml>=6.0",
+    "lap>=0.5.12",
 ]
 
 [tool.setuptools.packages.find]

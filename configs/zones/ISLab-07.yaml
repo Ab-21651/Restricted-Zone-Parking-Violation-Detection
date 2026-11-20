@@ -1,0 +1,10 @@
+# PROVISIONAL test zone (alley driving lane) - redraw with scripts/draw_zone.py
+video: ISLab-07.mp4
+frame_size: [640, 480]
+zones:
+- name: alley-lane
+  polygon:
+  - [200, 90]
+  - [410, 90]
+  - [560, 470]
+  - [30, 470]
