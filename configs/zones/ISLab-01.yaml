@@ -1,0 +1,37 @@
+# Scene A - drawn per docs/zone_policy.md (DRAFT, pending team review)
+video: ISLab-01.mp4
+scene: A
+frame_size: [632, 474]
+zones:
+- name: crosswalk-east
+  polygon:
+  - [420, 225]
+  - [455, 222]
+  - [500, 272]
+  - [462, 276]
+- name: crosswalk-south-1
+  polygon:
+  - [383, 368]
+  - [430, 338]
+  - [450, 350]
+  - [400, 376]
+- name: crosswalk-south-2
+  polygon:
+  - [450, 332]
+  - [532, 327]
+  - [537, 348]
+  - [455, 352]
+- name: crosswalk-south-3
+  polygon:
+  - [553, 343]
+  - [631, 347]
+  - [631, 364]
+  - [553, 355]
+- name: curbside-north
+  polygon:
+  - [122, 262]
+  - [300, 213]
+  - [332, 210]
+  - [332, 226]
+  - [305, 229]
+  - [128, 278]

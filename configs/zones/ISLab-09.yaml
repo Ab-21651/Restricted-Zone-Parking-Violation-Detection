@@ -1,0 +1,15 @@
+# Scene C - drawn per docs/zone_policy.md (DRAFT, pending team review)
+video: ISLab-09.mp4
+scene: C
+frame_size: [640, 480]
+zones:
+- name: fire-lane
+  polygon:
+  - [200, 88]
+  - [400, 88]
+  - [585, 300]
+  - [640, 365]
+  - [640, 480]
+  - [0, 480]
+  - [0, 450]
+  - [100, 280]

@@ -23,7 +23,7 @@ pipeline:
   process_fps: 10     # frames analysed per second of video (rest are skipped)
 
 dwell:
-  threshold_s: 30     # stationary time inside a zone before a violation is raised
+  threshold_s: 60     # stationary time inside a zone before a violation is raised (AVSS 2007 rule; 30 s = secondary setting)
   still_window_s: 2.0 # look-back window used to decide if a vehicle is stationary
   still_ratio: 0.15   # max movement in that window, as a fraction of box height
   grace_s: 5.0        # how long a vehicle may disappear (occlusion) before its state is dropped

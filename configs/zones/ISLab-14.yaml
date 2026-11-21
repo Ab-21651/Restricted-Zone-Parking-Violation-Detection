@@ -1,0 +1,11 @@
+# Scene E - drawn per docs/zone_policy.md (DRAFT, pending team review)
+video: ISLab-14.mp4
+scene: E
+frame_size: [640, 480]
+zones:
+- name: entrance
+  polygon:
+  - [250, 272]
+  - [330, 265]
+  - [345, 292]
+  - [255, 298]

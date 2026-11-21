@@ -9,6 +9,8 @@ models/*
 !models/.gitkeep
 
 # Data & outputs (large, not versioned)
+data/*
+!data/videos/
 data/videos/*
 !data/videos/.gitkeep
 outputs/

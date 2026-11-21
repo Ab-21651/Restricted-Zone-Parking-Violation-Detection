@@ -1,0 +1,11 @@
+# Scene F - drawn per docs/zone_policy.md (DRAFT, pending team review)
+video: ISLab-16.mp4
+scene: F
+frame_size: [640, 480]
+zones:
+- name: curbside
+  polygon:
+  - [0, 262]
+  - [640, 314]
+  - [640, 425]
+  - [0, 370]
