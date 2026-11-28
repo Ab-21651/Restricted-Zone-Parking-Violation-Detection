@@ -8,6 +8,7 @@ fastapi>=0.110
 uvicorn>=0.30
 # runtimes for the optimised model formats (Step 5)
 onnxruntime>=1.17
+onnx>=1.17          # Ultralytics needs it to load .onnx models (else it pip-installs it at every start)
 ncnn>=1.0.20240410
 # optional: only for scripts/fetch_detrac.py
 # kaggle>=1.6

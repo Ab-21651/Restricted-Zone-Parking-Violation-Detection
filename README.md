@@ -138,6 +138,12 @@ used for development and tuning; all other videos are the test set. Variants: A 
 alerts, B tracking only, C dwell without tracking, D tracking + dwell without duplicate merging,
 E full system.
 
+## Live demo
+
+Double-click `run_demo.bat` (starts Docker, all containers and the dashboard), `restart_demo.bat`
+(replay), `show_results.bat` (evaluation table) and `stop_demo.bat`. Step-by-step script for the
+class demonstration: [docs/DEMO.md](docs/DEMO.md). The IEEE report source is in [report/](report/).
+
 ## Privacy
 
 Alert snapshots are filtered on the edge node before they are sent: people are detected and
@@ -193,7 +199,8 @@ src/edgepark/     library: detector, video (incl. live latest-frame reader), zon
 scripts/          entry points (pipeline, dashboard, benchmarks, evaluation, figures)
 docker/           Mosquitto and MediaMTX (camera) configuration
 annotations/      ground truth for the ISLab videos
-docs/             zone policy, RESULTS.md
+docs/             zone policy, RESULTS.md, DEMO.md (live demo script)
+report/           IEEE conference report (LaTeX source, figures, references)
 tools/            fix-docker.ps1
 models/           weights and exports (git-ignored)
 data/             videos, DETRAC sample, datasets (git-ignored)

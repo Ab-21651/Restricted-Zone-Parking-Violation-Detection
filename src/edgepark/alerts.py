@@ -38,6 +38,9 @@ class AlertPublisher:
         self.host = os.environ.get("MQTT_HOST", host)
         self.port = int(os.environ.get("MQTT_PORT", port))
         self.node_id = node_id
+        # Event ids restart at 1 when the node restarts; the run id (start time)
+        # lets the dashboard tell a new run's events from the previous run's.
+        self.run_id = int(time.time())
         self.events_topic = f"{prefix}/{node_id}/events"
         self.status_topic = f"{prefix}/{node_id}/status"
         self.heartbeat_s = heartbeat_s
@@ -92,7 +95,7 @@ class AlertPublisher:
     def publish_event(self, event: dict, capture_ts: float, snapshot: np.ndarray | None = None) -> None:
         """``capture_ts`` = wall-clock time the triggering frame was captured,
         used by the dashboard to measure capture-to-alert latency."""
-        payload = dict(event, node=self.node_id, capture_ts=capture_ts, publish_ts=time.time())
+        payload = dict(event, node=self.node_id, run=self.run_id, capture_ts=capture_ts, publish_ts=time.time())
         if snapshot is not None:
             h, w = snapshot.shape[:2]
             if w > self.snapshot_width:
@@ -106,4 +109,4 @@ class AlertPublisher:
         now = time.time()
         if force or now - self._last_heartbeat >= self.heartbeat_s:
             self._last_heartbeat = now
-            self._publish(self.status_topic, dict(stats, node=self.node_id, state="online", ts=now), qos=0, retain=True)
+            self._publish(self.status_topic, dict(stats, node=self.node_id, run=self.run_id, state="online", ts=now), qos=0, retain=True)

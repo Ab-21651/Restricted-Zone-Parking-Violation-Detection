@@ -8,6 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DEFAULT_TIMEOUT=120 \
     YOLO_CONFIG_DIR=/tmp/Ultralytics \
+    YOLO_AUTOINSTALL=false \
     OPENCV_FFMPEG_CAPTURE_OPTIONS="rtsp_transport;tcp"
 
 # OpenCV runtime libraries

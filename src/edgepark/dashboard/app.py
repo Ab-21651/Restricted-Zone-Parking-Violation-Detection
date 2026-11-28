@@ -43,7 +43,7 @@ class DashboardState:
 
     @staticmethod
     def key(ev: dict) -> str:
-        return f"{ev.get('node')}:{ev.get('source')}:{ev.get('event_id')}"
+        return f"{ev.get('node')}:{ev.get('run')}:{ev.get('source')}:{ev.get('event_id')}"
 
     def on_event(self, ev: dict, received_ts: float) -> dict:
         lat = None
@@ -74,7 +74,13 @@ class DashboardState:
     def on_status(self, st: dict, received_ts: float) -> dict:
         st["received_ts"] = received_ts
         with self.lock:
-            self.nodes[st.get("node", "?")] = st
+            node, run = st.get("node", "?"), st.get("run")
+            if run is not None:
+                # the node restarted: violations of its previous run can no longer be cleared
+                stale = [k for k, ev in self.active.items() if ev.get("node") == node and ev.get("run") != run]
+                for k in stale:
+                    self.active.pop(k, None)
+            self.nodes[node] = st
         return st
 
     def snapshot(self) -> dict:

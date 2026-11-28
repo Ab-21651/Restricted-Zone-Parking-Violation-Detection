@@ -162,7 +162,12 @@ function connect() {
   es.onmessage = (m) => {
     const msg = JSON.parse(m.data);
     if (msg.type === "event") onEvent(msg.data);
-    else if (msg.type === "status") { S.nodes[msg.data.node] = msg.data; render(); }
+    else if (msg.type === "status") {
+      const n = msg.data;
+      // node restarted: drop its violations from the previous run (they can never be cleared)
+      if (n.run != null) for (const [k, e] of Object.entries(S.active)) if (e.node === n.node && e.run !== n.run) delete S.active[k];
+      S.nodes[n.node] = n; render();
+    }
     else if (msg.type === "broker") { S.broker = msg.connected; render(); }
   };
 }
