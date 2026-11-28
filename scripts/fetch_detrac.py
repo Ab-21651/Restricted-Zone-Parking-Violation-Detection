@@ -14,6 +14,7 @@ Needs Kaggle credentials (run `kaggle auth login` once, or put your API token in
 from __future__ import annotations
 
 import argparse
+import shutil
 import time
 import xml.etree.ElementTree as ET
 import zipfile
@@ -66,11 +67,20 @@ def main() -> None:
         for attempt in range(1, args.retries + 1):
             try:
                 api.dataset_download_file(DATASET, f"{REMOTE_DIR}/{seq}/{name}", path=str(dest_dir), quiet=True)
-                z = dest_dir / f"{name}.zip"
-                if z.exists():  # Kaggle sometimes wraps single files in a zip
+                # Newer Kaggle clients recreate the remote folders under `path`
+                # (and may wrap single files in a zip): find the file and flatten.
+                for z in list(dest_dir.rglob(f"{name}.zip")):
                     with zipfile.ZipFile(z) as zf:
-                        zf.extractall(dest_dir)
+                        zf.extractall(z.parent)
                     z.unlink()
+                if not dest.exists():
+                    for f in dest_dir.rglob(name):
+                        if f != dest:
+                            f.replace(dest)
+                            break
+                nested = dest_dir / REMOTE_DIR.split("/")[0]
+                if nested.exists():
+                    shutil.rmtree(nested, ignore_errors=True)
                 if dest.exists():
                     done += 1
                     break

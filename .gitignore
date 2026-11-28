@@ -13,7 +13,14 @@ data/*
 !data/videos/
 data/videos/*
 !data/videos/.gitkeep
-outputs/
+outputs/*
+# keep the small result files that back the report
+!outputs/bench/
+!outputs/eval/
+!outputs/figures/
+
+# Business Research paper materials (copyrighted base paper, drafts) - not part of the edge repo
+BR/
 
 # OS / editor
 .DS_Store

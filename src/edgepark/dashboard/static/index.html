@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EdgePark Monitor</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --text: #1d2330; --muted: #6b7385; --line: #e3e6ec;
+    --ok: #1f9d55; --warn: #d97706; --bad: #dc2626; --accent: #2563eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11141a; --panel: #1a1f28; --text: #e6e9ef; --muted: #97a0b3; --line: #2a3140;
+            --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --accent: #60a5fa; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 650; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); } .dot.warn { background: var(--warn); }
+  main { padding: 18px 16px; display: grid; gap: 18px; max-width: 1300px; margin: 0 auto; }
+  main > * { min-width: 0; }  /* let wide tables scroll inside their box instead of widening the page */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat .v { font-size: 22px; font-weight: 650; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .stat .v.bad { color: var(--bad); }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  section h2 { font-size: 14px; margin: 0 0 12px; font-weight: 650; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .card { border: 1px solid var(--bad); border-radius: 10px; overflow: hidden; background: var(--bg); }
+  .card img { width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; background: #000; }
+  .card .body { padding: 10px 12px; }
+  .card .title { font-weight: 650; color: var(--bad); }
+  .card .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .empty { color: var(--muted); padding: 18px; text-align: center; }
+  .nodes { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .node { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .node .row { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .node .row b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .tag { padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 650; }
+  .tag.violation { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .tag.cleared { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>EdgePark — Restricted Zone Monitor</h1>
+  <span class="pill"><span id="brokerDot" class="dot"></span><span id="brokerTxt">broker</span></span>
+  <span class="pill"><span id="streamDot" class="dot"></span><span id="streamTxt">live stream</span></span>
+</header>
+<main>
+  <div class="stats">
+    <div class="stat"><div class="k">Active violations</div><div class="v" id="sActive">0</div></div>
+    <div class="stat"><div class="k">Violations received</div><div class="v" id="sTotal">0</div></div>
+    <div class="stat"><div class="k">Capture → dashboard latency (mean)</div><div class="v" id="sLat">–</div></div>
+    <div class="stat"><div class="k">Edge nodes online</div><div class="v" id="sNodes">0</div></div>
+  </div>
+
+  <section>
+    <h2>Active violations</h2>
+    <div id="active" class="cards"></div>
+  </section>
+
+  <section>
+    <h2>Edge nodes</h2>
+    <div id="nodes" class="nodes"></div>
+  </section>
+
+  <section>
+    <h2>Event history</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Received</th><th>Event</th><th>Node / source</th><th>Zone</th><th>Vehicle</th><th>Dwell</th><th>Video time</th><th>Latency</th></tr></thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script>
+const S = { nodes: {}, active: {}, history: [], latencies: [], broker: false };
+const HEARTBEAT_STALE_S = 15;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clock = (ts) => ts ? new Date(ts * 1000).toLocaleTimeString() : "–";
+const ago = (ts) => { const s = Math.max(0, Date.now() / 1000 - ts); return s < 60 ? `${s.toFixed(0)}s ago` : `${(s / 60).toFixed(1)} min ago`; };
+const vt = (t) => t == null ? "–" : `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+
+function load(st) {
+  S.nodes = st.nodes || {};
+  S.active = {}; (st.active || []).forEach(e => S.active[e.key] = e);
+  S.history = st.history || [];
+  S.latencies = S.history.filter(e => e.event === "violation" && e.latency_ms != null).map(e => e.latency_ms);
+  S.broker = st.broker_connected;
+  render();
+}
+
+function onEvent(ev) {
+  if (ev.event === "violation") { S.active[ev.key] = ev; if (ev.latency_ms != null) S.latencies.push(ev.latency_ms); }
+  else if (ev.event === "cleared") delete S.active[ev.key];
+  S.history.unshift(ev); S.history = S.history.slice(0, 100);
+  render();
+}
+
+function nodeOnline(n) {
+  return n.state === "online" && (Date.now() / 1000 - n.received_ts) < HEARTBEAT_STALE_S;
+}
+
+function render() {
+  $("brokerDot").className = "dot " + (S.broker ? "ok" : "bad");
+  $("brokerTxt").textContent = S.broker ? "broker connected" : "broker disconnected";
+  const act = Object.values(S.active);
+  $("sActive").textContent = act.length;
+  $("sActive").className = "v" + (act.length ? " bad" : "");
+  $("sTotal").textContent = S.history.filter(e => e.event === "violation").length;
+  const lat = S.latencies;
+  $("sLat").textContent = lat.length ? `${(lat.reduce((a, b) => a + b, 0) / lat.length).toFixed(0)} ms` : "–";
+  const nodes = Object.values(S.nodes);
+  $("sNodes").textContent = `${nodes.filter(nodeOnline).length} / ${nodes.length}`;
+
+  $("active").innerHTML = act.length ? act.map(e => `
+    <div class="card">
+      ${e.has_snapshot ? `<img src="/api/snapshot/${encodeURIComponent(e.key)}" alt="violation snapshot">` : ""}
+      <div class="body">
+        <div class="title">${esc(e.class)} #${esc(e.track_id)} in ${esc(e.zone)}</div>
+        <div class="meta">${esc(e.node)} · ${esc(e.source)} · stopped ${e.dwell_s}s at alert</div>
+        <div class="meta">alert ${ago(e.received_ts)} · video ${vt(e.t)} · latency ${e.latency_ms ?? "–"} ms</div>
+      </div>
+    </div>`).join("") : `<div class="empty">No active violations</div>`;
+
+  $("nodes").innerHTML = nodes.length ? nodes.map(n => {
+    const on = nodeOnline(n);
+    return `<div class="node">
+      <div><span class="dot ${on ? "ok" : "bad"}" style="display:inline-block"></span> <b>${esc(n.node)}</b>
+        <span style="color:var(--muted)"> ${on ? "online" : esc(n.state === "online" ? "no heartbeat" : n.state)}</span></div>
+      <div class="row">source <b>${esc(n.source ?? "–")}</b></div>
+      <div class="row">processing <b>${n.fps ?? "–"} FPS · ${n.infer_ms ?? "–"} ms/frame</b></div>
+      <div class="row">vehicles in view <b>${n.vehicles ?? "–"}</b></div>
+      <div class="row">zones <b>${esc((n.zones || []).join(", ") || "–")}</b></div>
+      <div class="row">last heartbeat <b>${ago(n.received_ts)}</b></div>
+    </div>`;
+  }).join("") : `<div class="empty">No edge node has reported yet</div>`;
+
+  $("history").innerHTML = S.history.length ? S.history.map(e => `
+    <tr><td>${clock(e.received_ts)}</td><td><span class="tag ${esc(e.event)}">${esc(e.event)}</span></td>
+    <td>${esc(e.node)} / ${esc(e.source)}</td><td>${esc(e.zone)}</td><td>${esc(e.class)} #${esc(e.track_id)}</td>
+    <td class="num">${e.dwell_s}s</td><td class="num">${vt(e.t)}</td><td class="num">${e.latency_ms != null ? e.latency_ms + " ms" : "–"}</td></tr>`).join("")
+    : `<tr><td colspan="8" class="empty">No events yet</td></tr>`;
+}
+
+function connect() {
+  const es = new EventSource("/api/stream");
+  es.onopen = () => { $("streamDot").className = "dot ok"; $("streamTxt").textContent = "live"; fetch("/api/state").then(r => r.json()).then(load); };
+  es.onerror = () => { $("streamDot").className = "dot bad"; $("streamTxt").textContent = "reconnecting…"; };
+  es.onmessage = (m) => {
+    const msg = JSON.parse(m.data);
+    if (msg.type === "event") onEvent(msg.data);
+    else if (msg.type === "status") { S.nodes[msg.data.node] = msg.data; render(); }
+    else if (msg.type === "broker") { S.broker = msg.connected; render(); }
+  };
+}
+connect();
+setInterval(render, 2000);  // refresh "ago" labels and stale-node detection
+</script>
+</body>
+</html>

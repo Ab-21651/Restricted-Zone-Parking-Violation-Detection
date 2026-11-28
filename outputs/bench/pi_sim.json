@@ -1,0 +1,140 @@
+[
+  {
+    "model": "yolov8n",
+    "format": "pytorch",
+    "cpus": 0.57,
+    "inference_ms": 315.3,
+    "runs_ms": [
+      310.77,
+      315.27,
+      317.6
+    ],
+    "preprocess_ms": 6.12,
+    "postprocess_ms": 8.2,
+    "map50_95_coco128": 0.4469,
+    "pi5_published_ms": null
+  },
+  {
+    "model": "yolov8n",
+    "format": "onnx",
+    "cpus": 0.57,
+    "inference_ms": 224.6,
+    "runs_ms": [
+      223.0,
+      224.57,
+      227.43
+    ],
+    "preprocess_ms": 4.66,
+    "postprocess_ms": 4.87,
+    "map50_95_coco128": 0.4515,
+    "pi5_published_ms": null
+  },
+  {
+    "model": "yolov8n",
+    "format": "ncnn",
+    "cpus": 0.57,
+    "inference_ms": 259.6,
+    "runs_ms": [
+      255.74,
+      259.58,
+      260.49
+    ],
+    "preprocess_ms": 3.48,
+    "postprocess_ms": 3.91,
+    "map50_95_coco128": 0.4515,
+    "pi5_published_ms": null
+  },
+  {
+    "model": "yolo11n",
+    "format": "pytorch",
+    "cpus": 0.57,
+    "inference_ms": 303.9,
+    "runs_ms": [
+      298.65,
+      303.94,
+      315.76
+    ],
+    "preprocess_ms": 1.57,
+    "postprocess_ms": 4.97,
+    "map50_95_coco128": 0.5076,
+    "pi5_published_ms": null
+  },
+  {
+    "model": "yolo11n",
+    "format": "onnx",
+    "cpus": 0.57,
+    "inference_ms": 194.6,
+    "runs_ms": [
+      194.24,
+      194.58,
+      198.81
+    ],
+    "preprocess_ms": 5.81,
+    "postprocess_ms": 4.35,
+    "map50_95_coco128": 0.5052,
+    "pi5_published_ms": null
+  },
+  {
+    "model": "yolo11n",
+    "format": "ncnn",
+    "cpus": 0.57,
+    "inference_ms": 267.9,
+    "runs_ms": [
+      264.91,
+      267.87,
+      268.26
+    ],
+    "preprocess_ms": 4.98,
+    "postprocess_ms": 4.21,
+    "map50_95_coco128": 0.5052,
+    "pi5_published_ms": null
+  },
+  {
+    "model": "yolo26n",
+    "format": "pytorch",
+    "cpus": 0.57,
+    "inference_ms": 285.8,
+    "runs_ms": [
+      272.38,
+      285.8,
+      291.97
+    ],
+    "preprocess_ms": 7.45,
+    "postprocess_ms": 7.2,
+    "map50_95_coco128": 0.487,
+    "pi5_published_ms": 299.09,
+    "error_pct": -4.4
+  },
+  {
+    "model": "yolo26n",
+    "format": "onnx",
+    "cpus": 0.57,
+    "inference_ms": 187.2,
+    "runs_ms": [
+      180.57,
+      187.15,
+      190.5
+    ],
+    "preprocess_ms": 7.07,
+    "postprocess_ms": 3.17,
+    "map50_95_coco128": 0.4773,
+    "pi5_published_ms": 125.99,
+    "error_pct": 48.6
+  },
+  {
+    "model": "yolo26n",
+    "format": "ncnn",
+    "cpus": 0.57,
+    "inference_ms": 310.7,
+    "runs_ms": [
+      280.97,
+      310.67,
+      421.64
+    ],
+    "preprocess_ms": 3.34,
+    "postprocess_ms": 4.67,
+    "map50_95_coco128": 0.4773,
+    "pi5_published_ms": 67.03,
+    "error_pct": 363.5
+  }
+]

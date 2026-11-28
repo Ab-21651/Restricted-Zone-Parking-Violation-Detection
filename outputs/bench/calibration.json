@@ -1,0 +1,49 @@
+{
+  "model": "yolo26n.pt",
+  "reference": "Ultralytics Raspberry Pi guide, Raspberry Pi 5, FP32, imgsz 640, coco128",
+  "pi5_inference_ms": 299.09,
+  "repeats": 3,
+  "sweep": [
+    {
+      "cpus": 0.5,
+      "inference_ms": 384.9,
+      "runs_ms": [
+        334.29,
+        384.94,
+        424.43
+      ],
+      "map50_95": 0.487
+    },
+    {
+      "cpus": 0.6,
+      "inference_ms": 276.1,
+      "runs_ms": [
+        273.82,
+        276.05,
+        283.91
+      ],
+      "map50_95": 0.487
+    },
+    {
+      "cpus": 0.75,
+      "inference_ms": 210.1,
+      "runs_ms": [
+        204.49,
+        210.07,
+        225.49
+      ],
+      "map50_95": 0.487
+    },
+    {
+      "cpus": 1.0,
+      "inference_ms": 157.0,
+      "runs_ms": [
+        152.88,
+        156.96,
+        158.78
+      ],
+      "map50_95": 0.487
+    }
+  ],
+  "calibrated_cpus": 0.57
+}

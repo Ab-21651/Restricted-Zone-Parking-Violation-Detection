@@ -31,7 +31,7 @@ def overview(video: Path, detector: VehicleDetector, sample_fps: float, n_thumbs
     samples, thumbs = [], []
     thumb_times = list(np.linspace(0, dur * 0.97, n_thumbs))
 
-    for _, t, frame in iter_frames(str(video), sample_fps):
+    for _, t, _, frame in iter_frames(str(video), sample_fps):
         dets, _ = detector.detect(frame)
         if dets:
             layer = np.zeros_like(heat)  # cv2.circle overwrites, so draw per frame then add

@@ -7,15 +7,21 @@ baseline and the optimised models benchmarked later.
 
 from __future__ import annotations
 
+import os
 import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import torch
 from ultralytics import YOLO
 
 from .config import MODELS_DIR, PROJECT_ROOT
+
+# Inference thread count (e.g. 4 = Raspberry Pi 5 cores). Set in the Docker image.
+if os.environ.get("EDGEPARK_THREADS"):
+    torch.set_num_threads(int(os.environ["EDGEPARK_THREADS"]))
 
 DEFAULT_VEHICLE_CLASSES = {2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
 

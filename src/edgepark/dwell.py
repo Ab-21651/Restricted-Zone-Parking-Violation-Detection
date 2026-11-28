@@ -63,6 +63,7 @@ class DwellConfig:
     grace_s: float = 5.0
     reassoc_iou: float = 0.5
     dup_iou: float = 0.7  # a new box overlapping a live vehicle this much is a duplicate
+    dup_point_ratio: float = 0.2  # ...or whose ground point is this close (x box height)
 
     @classmethod
     def from_dict(cls, d: dict | None) -> "DwellConfig":
@@ -85,13 +86,27 @@ class ViolationMonitor:
                 return z.name
         return None
 
-    def _is_still(self, st: VehicleState, t: float) -> bool:
-        """Stationary if every point in the look-back window is close to the latest one."""
-        if not st.history or t - st.history[0][0] < self.cfg.still_window_s * 0.8:
-            return False  # not enough history yet
-        _, x, y, h = st.history[-1]
+    def _motion(self, st: VehicleState) -> str:
+        """'moving' if any recent ground point is far from the latest one,
+        'still' if all are close and they span the whole look-back window,
+        'unknown' if they are close but cover too little time to tell yet."""
+        t_last, x, y, h = st.history[-1]
         limit = self.cfg.still_ratio * max(h, 1.0)
-        return all(((x - hx) ** 2 + (y - hy) ** 2) ** 0.5 <= limit for _, hx, hy, _ in st.history)
+        if any(((x - hx) ** 2 + (y - hy) ** 2) ** 0.5 > limit for _, hx, hy, _ in st.history):
+            return "moving"
+        if t_last - st.history[0][0] >= self.cfg.still_window_s * 0.8:
+            return "still"
+        return "unknown"
+
+    def _same_vehicle(self, st: VehicleState, det: Detection) -> bool:
+        """Duplicate box test: strong overlap, or (for small boxes, where a few
+        pixels of offset already ruin the IoU) nearly the same ground point."""
+        if iou(st.bbox, det.xyxy) >= self.cfg.dup_iou:
+            return True
+        sx, sy = (st.bbox[0] + st.bbox[2]) / 2.0, st.bbox[3]
+        dx, dy = det.bottom_center
+        h = max(min(st.bbox[3] - st.bbox[1], det.height), 1.0)
+        return ((sx - dx) ** 2 + (sy - dy) ** 2) ** 0.5 <= self.cfg.dup_point_ratio * h
 
     def _inherit(self, det: Detection, t: float, seen: set[int]) -> VehicleState | None:
         """Find a recently lost state this new track probably belongs to."""
@@ -117,9 +132,7 @@ class ViolationMonitor:
             if zone is None:
                 continue  # outside every zone: not tracked for dwell
             tid = det.track_id
-            if tid not in self.states and any(
-                iou(self.states[s].bbox, det.xyxy) >= self.cfg.dup_iou for s in seen
-            ):
+            if tid not in self.states and any(self._same_vehicle(self.states[s], det) for s in seen):
                 continue  # second box on a vehicle already handled this frame
             st = self.states.get(tid)
             if st is None:
@@ -136,14 +149,19 @@ class ViolationMonitor:
             st.zone, st.bbox, st.last_seen = zone, det.xyxy, t
             x, y = det.bottom_center
             st.history.append((t, x, y, det.height))
-            while st.history and t - st.history[0][0] > self.cfg.still_window_s:
+            # Keep the window, plus the newest sample from before it: on a slow,
+            # bursty edge CPU frames can be >1 s apart, and the motion check must
+            # still be able to compare across such gaps.
+            while len(st.history) > 2 and t - st.history[1][0] >= self.cfg.still_window_s:
                 st.history.popleft()
 
-            if self._is_still(st, t):
-                if st.stop_since is None:
-                    st.stop_since = st.history[0][0]  # it has been still for the whole window
-            elif st.violation_since is None:
-                st.stop_since = None  # moving again before an alert: reset the timer
+            motion = self._motion(st)
+            if motion == "moving":
+                if st.violation_since is None:
+                    st.stop_since = None  # really moved before an alert: reset the timer
+            elif motion == "still" and st.stop_since is None:
+                st.stop_since = st.history[0][0]  # it has been still for the whole window
+            # motion == "unknown" (too little history yet): leave the timer as it is
 
             if st.violation_since is None and st.dwell(t) >= self.cfg.threshold_s:
                 st.violation_since = t

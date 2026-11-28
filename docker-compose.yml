@@ -1,0 +1,75 @@
+# Simulated edge deployment.
+#
+#   camera     RTSP server looping an ISLab video  -> rtsp://camera:8554/cam
+#   edge-node  detector + tracker + dwell logic, limited to Raspberry-Pi-like CPU/RAM
+#   mosquitto  MQTT broker
+#   dashboard  monitoring web app                  -> http://localhost:8000
+#
+#   docker compose up -d                     # whole system (CAM=ISLab-07 by default)
+#   $env:CAM="ISLab-04"; docker compose up -d  # another video (zones file must exist)
+#   docker compose logs -f edge-node         # follow the edge node
+#   docker stats                             # live CPU / RAM per container
+#   docker compose down                      # stop everything
+#
+# EDGE_CPUS is the calibrated CPU limit that makes this laptop match a Raspberry Pi 5
+# (see scripts/calibrate_cpus.py and outputs/bench/calibration.json).
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: edgepark-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    restart: unless-stopped
+
+  camera:
+    image: bluenviron/mediamtx:1.9.3-ffmpeg
+    container_name: edgepark-camera
+    environment:
+      - CAM=${CAM:-ISLab-07}
+    volumes:
+      - ./docker/camera/mediamtx.yml:/mediamtx.yml:ro
+      - ./data/videos/islab:/videos:ro
+    ports:
+      - "8554:8554"
+    restart: unless-stopped
+
+  edge-node:
+    build: .
+    image: edgepark-node:latest
+    container_name: edgepark-edge
+    depends_on: [mosquitto, camera]
+    cpus: ${EDGE_CPUS:-0.57}   # calibrated: YOLO26n PyTorch 302 ms vs Pi 5 299 ms (laptop on charger, best-performance mode)
+    mem_limit: ${EDGE_MEM:-4g}
+    environment:
+      - MQTT_HOST=mosquitto
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data:ro
+      - ./outputs:/app/outputs
+      - ./configs:/app/configs:ro
+      - ./scripts:/app/scripts:ro
+      - ./src:/app/src:ro          # live code (no rebuild needed after edits)
+    command: >
+
+      python scripts/run_pipeline.py --source rtsp://camera:8554/cam
+      --zones configs/zones/${CAM:-ISLab-07}.yaml --mqtt
+    restart: unless-stopped
+
+  dashboard:
+    image: edgepark-node:latest
+    container_name: edgepark-dashboard
+    depends_on: [mosquitto]
+    environment:
+      - MQTT_HOST=mosquitto
+    volumes:
+      - ./outputs:/app/outputs
+      - ./configs:/app/configs:ro
+      - ./scripts:/app/scripts:ro
+      - ./src:/app/src:ro
+    ports:
+      - "8000:8000"
+    command: python scripts/run_dashboard.py --host 0.0.0.0
+    restart: unless-stopped

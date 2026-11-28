@@ -13,7 +13,15 @@ dependencies = [
     "numpy>=1.24",
     "pyyaml>=6.0",
     "lap>=0.5.12",
+    "paho-mqtt>=2.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.30",
+    "onnxruntime>=1.17",
+    "ncnn>=1.0.20240410",
 ]
+
+[project.optional-dependencies]
+data = ["kaggle>=1.6", "six"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

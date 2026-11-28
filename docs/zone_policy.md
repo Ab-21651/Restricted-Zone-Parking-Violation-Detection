@@ -77,4 +77,12 @@ Overlay of all zones: `outputs/zones_work/all_zones.jpg` (regenerate with the sn
 | C Alley | 07–12 | `fire-lane` | R1.1 (too narrow for a shoulder, so the whole paved lane) | Walkway under the pergola on the right is excluded. A motorbike stands on the paved lane next to the wall in all six videos and is inside the zone — under R1.1 it counts as a violation. **Agreed by team (2026-11-21).** |
 | D Campus road | 13 | `entrance`, `curbside-east` | R1.3 (parking-lot entrance), R1.2 (yellow curb line on the right) | The lot itself is legal parking (R2.2), with a margin from its front row (R3.2). |
 | E Parking-lot area | 14 | `entrance` | R1.3 (driveway mouth of the lot) | Road edges have white lines only (no parking ban visible), so not restricted. |
-| F Night road (IR) | 15–16 | `curbside` | R1.2 | **Assumption:** no-parking curb — markings are not visible in infrared. |
+| F Night road (IR) | 15–16 | `curbside` | R1.2 | **Assumption:** no-parking curb — markings are not visible in infrared. Strip widened on 2026-11-21 (see change log). |
+
+## Change log
+
+| Date | Zone | Change | Evidence (dev videos only) |
+|------|------|--------|----------------------------|
+| 2026-11-21 | Scene F `curbside` (ISLab-15, -16) | Lower edge moved from y = 370…425 to y = 387…439, i.e. strip width 108–111 px → 125 px | On **dev** video ISLab-15 the curb-parked car's ground point lies 114 px from the curb (y = 398 at x = 268), outside the original 103 px strip. R1.2 defines the strip as one car-width; the measured car-width + ~10 % replaces the estimate. The width comes from the dev measurement only. Test video ISLab-16 (same zone) was traced in the same diagnostic pass; the new width was **not** set to include it, and its car stays outside the strip. |
+
+Not changed (test videos, frozen): the evaluation showed that the scene D `entrance` zone (ISLab-13) ends ~10 px above the ground point of the car parked in the entrance, and that the angled night car in ISLab-16 has its box bottom ~33 px beyond the widened strip. These are reported as failure cases, not fixed, because changing test zones after seeing test results would bias the evaluation.

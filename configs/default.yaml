@@ -3,7 +3,9 @@
 model:
   # Bare names (e.g. yolov8n.pt, yolo11n.pt) are auto-downloaded into models/.
   # Later steps will point this at exported formats (ONNX / NCNN / TFLite).
-  path: yolov8n.pt
+  # Step 5 choice: YOLO26n = most accurate of the three nano models on UA-DETRAC
+  # (mAP50-95 0.582), ONNX = fastest format on the Pi-5-calibrated container (187 ms/im).
+  path: models/yolo26n.onnx
   imgsz: 640
   conf: 0.35          # minimum confidence to keep a detection (detect-only mode)
   iou: 0.5            # NMS IoU threshold
@@ -28,6 +30,22 @@ dwell:
   still_ratio: 0.15   # max movement in that window, as a fraction of box height
   grace_s: 5.0        # how long a vehicle may disappear (occlusion) before its state is dropped
   reassoc_iou: 0.5    # a new track overlapping a lost one this much inherits its state
+
+mqtt:
+  enabled: false      # or pass --mqtt to run_pipeline.py
+  host: localhost     # env MQTT_HOST overrides (used inside Docker)
+  port: 1883
+  node_id: edge-01
+  topic_prefix: edgepark
+  heartbeat_s: 5
+  snapshot: true      # attach a JPEG snapshot to violation events
+
+privacy:
+  blur_persons: true  # blur people in alert snapshots before they leave the edge node
+
+dashboard:
+  host: 127.0.0.1
+  port: 8000
 
 source:
   # Video file path, webcam index (0), or RTSP URL (used in the simulation step)

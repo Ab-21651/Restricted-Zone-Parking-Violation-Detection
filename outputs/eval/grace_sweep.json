@@ -1,0 +1,71 @@
+{
+  "split": "dev",
+  "videos": [
+    "ISLab-01",
+    "ISLab-04",
+    "ISLab-07",
+    "ISLab-08",
+    "ISLab-15"
+  ],
+  "T": 60.0,
+  "variant": "full",
+  "rows": [
+    {
+      "grace_s": 5.0,
+      "alerts": 9,
+      "TP": 8,
+      "FP": 0,
+      "duplicates": 1,
+      "missed": 0,
+      "gt_violations": 8,
+      "ignored": 0,
+      "precision": 0.889,
+      "recall": 1.0,
+      "F1": 0.941,
+      "mean_delay_s": 10.2
+    },
+    {
+      "grace_s": 10.0,
+      "alerts": 9,
+      "TP": 8,
+      "FP": 0,
+      "duplicates": 1,
+      "missed": 0,
+      "gt_violations": 8,
+      "ignored": 0,
+      "precision": 0.889,
+      "recall": 1.0,
+      "F1": 0.941,
+      "mean_delay_s": 10.2
+    },
+    {
+      "grace_s": 15.0,
+      "alerts": 9,
+      "TP": 8,
+      "FP": 0,
+      "duplicates": 1,
+      "missed": 0,
+      "gt_violations": 8,
+      "ignored": 0,
+      "precision": 0.889,
+      "recall": 1.0,
+      "F1": 0.941,
+      "mean_delay_s": 10.2
+    },
+    {
+      "grace_s": 20.0,
+      "alerts": 9,
+      "TP": 8,
+      "FP": 0,
+      "duplicates": 1,
+      "missed": 0,
+      "gt_violations": 8,
+      "ignored": 0,
+      "precision": 0.889,
+      "recall": 1.0,
+      "F1": 0.941,
+      "mean_delay_s": 10.2
+    }
+  ],
+  "chosen": 5.0
+}

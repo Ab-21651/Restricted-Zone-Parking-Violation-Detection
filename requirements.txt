@@ -3,3 +3,12 @@ opencv-python>=4.8
 numpy>=1.24
 pyyaml>=6.0
 lap>=0.5.12
+paho-mqtt>=2.0
+fastapi>=0.110
+uvicorn>=0.30
+# runtimes for the optimised model formats (Step 5)
+onnxruntime>=1.17
+ncnn>=1.0.20240410
+# optional: only for scripts/fetch_detrac.py
+# kaggle>=1.6
+# six

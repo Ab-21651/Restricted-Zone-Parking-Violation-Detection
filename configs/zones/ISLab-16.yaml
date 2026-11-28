@@ -1,4 +1,4 @@
-# Scene F - drawn per docs/zone_policy.md (DRAFT, pending team review)
+﻿# Scene F - drawn per docs/zone_policy.md; lower edge widened 2026-11-21 from dev video ISLab-15 (see policy change log)
 video: ISLab-16.mp4
 scene: F
 frame_size: [640, 480]
@@ -7,5 +7,5 @@ zones:
   polygon:
   - [0, 262]
   - [640, 314]
-  - [640, 425]
-  - [0, 370]
+  - [640, 439]
+  - [0, 387]

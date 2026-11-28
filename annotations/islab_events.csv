@@ -1,0 +1,40 @@
+# Ground truth: stationary-vehicle events inside the restricted zones of the ISLab PVD videos.
+# PROVENANCE: produced by Claude (AI assistant) on 2026-11-21 by visual inspection of raw video
+# frames (contact sheets every 5 s, and every 1 s around every event that lasted close to 60 s),
+# with only the zone outline drawn - no detector or tracker output was shown, so the labels are
+# independent of the system under test. Made at the team's request; not checked by a second annotator.
+# Sheets used: outputs/labeling/ (regenerate with scripts/label_sheets.py).
+#
+# stop_s / leave_s : video time (s) when the vehicle came to rest in the zone / started to leave.
+# precision_s      : +- uncertainty of both times (2.5 = bracketed by 5 s samples, 1 = 1 s samples).
+# present_at_start : already parked when the video starts (stop_s = 0 = earliest observable time).
+# still_at_end     : still parked when the video ends (leave_s = video length).
+# ambiguous        : 1 = zone membership is debatable -> excluded from scoring ("don't care").
+# A violation at threshold T is an event with (leave_s - stop_s) >= T.
+# Split: dev = 01, 04, 07, 08, 15 (used for development / tuning); test = all others.
+# CORRECTION (2026-11-21, dev video ISLab-04): the zone was first entered as curbside-left; re-measuring
+# the car position on the labelling sheet (crop offset x+30 px, scale 0.49) puts it at about (326,187),
+# inside curbside-right. Changed to curbside-right. Stop / leave times unchanged.
+video,split,event,vehicle,zone,stop_s,leave_s,precision_s,present_at_start,still_at_end,ambiguous,notes
+ISLab-01,dev,1,car,curbside-north,0,328,2.5,1,1,0,small silver car parked at the north curb for the whole video
+ISLab-01,dev,2,car,curbside-north,7.5,97.5,7.5,0,0,0,second car parks just behind it; arrives 0-15 s and leaves 90-105 s (15 s samples on the zoomed sheet)
+ISLab-02,test,1,car,curbside-north,25,101,1,0,0,0,car drives along the north curb and parks
+ISLab-04,dev,1,car,curbside-right,67.5,162.5,2.5,0,0,0,SUV parks at the upper curb (right/sidewalk side); zone corrected from curbside-left - see correction note
+ISLab-05,test,1,car,curbside-left,27.5,157.5,2.5,0,0,0,SUV parks at the lower left curb
+ISLab-07,dev,1,motorcycle,fire-lane,0,130,2.5,1,1,0,motorbike parked on the lane by the wall (team agreed: counts as a violation)
+ISLab-07,dev,2,car,fire-lane,32.5,130,2.5,0,1,0,SUV drives in and parks
+ISLab-08,dev,1,motorcycle,fire-lane,0,109,2.5,1,1,0,motorbike parked by the wall
+ISLab-08,dev,2,car,fire-lane,32.5,109,2.5,0,1,0,SUV drives in and parks
+ISLab-09,test,1,motorcycle,fire-lane,0,117,2.5,1,1,0,motorbike parked by the wall
+ISLab-09,test,2,car,fire-lane,47.5,117,2.5,0,1,0,SUV parks at the far end of the lane (near the zone's top edge)
+ISLab-10,test,1,motorcycle,fire-lane,0,102.5,2.5,1,0,0,motorbike by the wall; rider leaves with it at ~100-105 s
+ISLab-10,test,2,car,fire-lane,63,120,1,0,0,0,car stops at the far end for 57 s (below 60 s) then repositions
+ISLab-10,test,3,car,fire-lane,124,148,1,0,0,0,same car stops again further right for 24 s then drives away
+ISLab-11,test,1,car,fire-lane,47.5,137,2.5,0,1,0,SUV parks across the lane; driver gets out later
+ISLab-12,test,1,car,fire-lane,64,134,1,0,0,0,SUV parks across the lane near the camera for 70 s then leaves
+ISLab-13,test,1,car,entrance,14,84,1,0,0,0,SUV stops in the parking-lot entrance for 70 s
+ISLab-14,test,1,car,entrance,119,177,1,0,0,1,SUV stops across the driveway mouth for 58 s; body over the entrance but wheels in the travel lane -> ambiguous
+ISLab-15,dev,1,car,curbside,7.5,127.5,2.5,0,0,0,night (IR): car parks at the curb
+ISLab-16,test,1,car,curbside,26,99,1,0,0,0,night (IR): car parks at an angle into the curb strip
+# Videos with no stationary vehicle in any zone (checked on all sheets): ISLab-03, ISLab-06.
+# Crosswalk zones (scene A): vehicles only pass through; no stop of more than one 5 s sample.
